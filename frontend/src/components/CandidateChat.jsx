@@ -3,72 +3,101 @@ import { generateChatReply } from "../services/ai";
 
 export default function CandidateChat({ candidate, onClose }) {
   const [messages, setMessages] = useState([
-    { from: "recruiter", text: "Are you open to this role?" }
+    {
+      sender: "recruiter",
+      text: "Are you open to this role?",
+    },
   ]);
-  const [replied, setReplied] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [input, setInput] = useState("");
 
-  const sendResponse = async () => {
-    setLoading(true);
+  const sendMessage = async () => {
+    if (!input.trim()) return;
 
-    let reply = "";
+    const newMessages = [
+      ...messages,
+      { sender: "recruiter", text: input },
+    ];
+    setMessages(newMessages);
+    setInput("");
 
     try {
-      reply = await generateChatReply(candidate.name, candidate.status);
+      const reply = await generateChatReply(candidate.name, input);
+
+      setMessages((prev) => [
+        ...prev,
+        { sender: "candidate", text: reply },
+      ]);
     } catch {
-      reply = "Sorry, couldn't respond right now.";
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: "candidate",
+          text: "I'm interested, can you share more details?",
+        },
+      ]);
     }
-
-    setMessages((prev) => [
-      ...prev,
-      { from: candidate.name, text: reply }
-    ]);
-
-    setLoading(false);
-    setReplied(true);
   };
 
   return (
     <div
       style={{
-        border: "1px solid #ccc",
-        padding: 16,
-        marginTop: 10,
-        borderRadius: "8px",
-        background: "#fafafa"
+        backgroundColor: "#1e1e2f",
+        color: "white",
+        padding: "20px",
+        borderRadius: "12px",
+        marginTop: "15px",
       }}
     >
-      <strong>Chat with {candidate.name}</strong>
+      <h3 style={{ marginBottom: "10px" }}>
+        Chat with {candidate.name}
+      </h3>
 
-      <div style={{ margin: "10px 0" }}>
-        {messages.map((m, i) => (
-          <div
+      <div
+        style={{
+          maxHeight: "200px",
+          overflowY: "auto",
+          marginBottom: "10px",
+        }}
+      >
+        {messages.map((msg, i) => (
+          <p
             key={i}
             style={{
-              textAlign: m.from === "recruiter" ? "right" : "left",
-              marginBottom: "6px"
+              color:
+                msg.sender === "recruiter" ? "#4CAF50" : "#FFD700",
+              margin: "5px 0",
             }}
           >
-            <small>
-              <b>{m.from}:</b> {m.text}
-            </small>
-          </div>
+            <strong>
+              {msg.sender === "recruiter"
+                ? "Recruiter"
+                : candidate.name}
+              :
+            </strong>{" "}
+            {msg.text}
+          </p>
         ))}
-
-        {loading && (
-          <div>
-            <small><i>{candidate.name} is typing...</i></small>
-          </div>
-        )}
       </div>
 
-      {!replied && (
-        <button onClick={sendResponse}>
-          Simulate Response
-        </button>
-      )}
+      <input
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder="Type message..."
+        style={{
+          width: "70%",
+          padding: "8px",
+          borderRadius: "6px",
+          border: "none",
+          marginRight: "10px",
+        }}
+      />
 
-      <button onClick={onClose} style={{ marginLeft: 8 }}>
+      <button onClick={sendMessage}>Send</button>
+
+      <button
+        onClick={onClose}
+        style={{ marginLeft: "10px" }}
+      >
         Close
       </button>
     </div>

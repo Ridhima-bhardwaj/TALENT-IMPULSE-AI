@@ -20,7 +20,7 @@ export default function CandidateChat({ candidate, onClose }) {
     const reply = await generateChatReply(
       candidate.name,
       input,
-      candidate.interest
+      candidate.interestScore
     );
 
     setMessages((prev) => [

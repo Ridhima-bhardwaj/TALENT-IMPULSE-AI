@@ -24,13 +24,12 @@ async function ask(messages, max_tokens = 50) {
     }
 
     return data.choices?.[0]?.message?.content?.trim() || "No response";
-  } catch (err) {
-    console.error("AI ERROR:", err.message);
+  } catch {
     return "AI unavailable";
   }
 }
 
-// 🔹 Insight
+// Insight
 export async function generateInsight(name, match, interest) {
   return await ask(
     [
@@ -43,7 +42,7 @@ export async function generateInsight(name, match, interest) {
   );
 }
 
-// 🔹 Suggestion
+// Suggestion
 export async function generateFeedback(name, skills) {
   return await ask(
     [
@@ -57,14 +56,36 @@ export async function generateFeedback(name, skills) {
 }
 
 
-export async function generateChatReply(name, message) {
-  return await ask(
-    [
-      {
-        role: "user",
-        content: `You are a job candidate named ${name}. Reply naturally to recruiter message: "${message}". Keep it short.`,
-      },
-    ],
-    60
-  );
+export async function generateChatReply(name, message, interest) {
+  try {
+    let tone = "";
+
+    if (interest > 70) {
+      tone = "very interested and positive";
+    } else if (interest > 40) {
+      tone = "neutral and slightly interested";
+    } else {
+      tone = "not interested and slightly dismissive";
+    }
+
+    return await ask(
+      [
+        {
+          role: "user",
+          content: `You are a job candidate named ${name}.
+Your attitude is ${tone}.
+
+Reply to recruiter message: "${message}"
+Keep it short and realistic.`,
+        },
+      ],
+      60
+    );
+  } catch {
+    return interest > 70
+      ? "Yes, I’m interested. Can you share more details?"
+      : interest > 40
+      ? "I’m considering it, can you share more info?"
+      : "I’m not interested at the moment.";
+  }
 }

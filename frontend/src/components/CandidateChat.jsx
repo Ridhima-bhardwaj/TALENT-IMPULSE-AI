@@ -13,29 +13,20 @@ export default function CandidateChat({ candidate, onClose }) {
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    const newMessages = [
-      ...messages,
-      { sender: "recruiter", text: input },
-    ];
-    setMessages(newMessages);
+    const updated = [...messages, { sender: "recruiter", text: input }];
+    setMessages(updated);
     setInput("");
 
-    try {
-      const reply = await generateChatReply(candidate.name, input);
+    const reply = await generateChatReply(
+      candidate.name,
+      input,
+      candidate.interest
+    );
 
-      setMessages((prev) => [
-        ...prev,
-        { sender: "candidate", text: reply },
-      ]);
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        {
-          sender: "candidate",
-          text: "I'm interested, can you share more details?",
-        },
-      ]);
-    }
+    setMessages((prev) => [
+      ...prev,
+      { sender: "candidate", text: reply },
+    ]);
   };
 
   return (
@@ -48,24 +39,15 @@ export default function CandidateChat({ candidate, onClose }) {
         marginTop: "15px",
       }}
     >
-      <h3 style={{ marginBottom: "10px" }}>
-        Chat with {candidate.name}
-      </h3>
+      <h3>Chat with {candidate.name}</h3>
 
-      <div
-        style={{
-          maxHeight: "200px",
-          overflowY: "auto",
-          marginBottom: "10px",
-        }}
-      >
+      <div style={{ maxHeight: "200px", overflowY: "auto" }}>
         {messages.map((msg, i) => (
           <p
             key={i}
             style={{
               color:
                 msg.sender === "recruiter" ? "#4CAF50" : "#FFD700",
-              margin: "5px 0",
             }}
           >
             <strong>
@@ -86,18 +68,17 @@ export default function CandidateChat({ candidate, onClose }) {
         style={{
           width: "70%",
           padding: "8px",
+          marginTop: "10px",
           borderRadius: "6px",
           border: "none",
-          marginRight: "10px",
         }}
       />
 
-      <button onClick={sendMessage}>Send</button>
+      <button onClick={sendMessage} style={{ marginLeft: "10px" }}>
+        Send
+      </button>
 
-      <button
-        onClick={onClose}
-        style={{ marginLeft: "10px" }}
-      >
+      <button onClick={onClose} style={{ marginLeft: "10px" }}>
         Close
       </button>
     </div>

@@ -1,33 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { generateChatReply } from "../services/ai";
 
 export default function CandidateChat({ candidate, onClose }) {
-  const [messages, setMessages] = useState([
-    {
-      sender: "recruiter",
-      text: "Are you open to this role?",
-    },
-  ]);
-  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState([]);
 
-  const sendMessage = async () => {
-    if (!input.trim()) return;
+  useEffect(() => {
+    async function simulateConversation() {
+      const recruiterMsg = "Are you open to this role?";
 
-    const updated = [...messages, { sender: "recruiter", text: input }];
-    setMessages(updated);
-    setInput("");
+      setMessages([{ sender: "recruiter", text: recruiterMsg }]);
 
-    const reply = await generateChatReply(
-      candidate.name,
-      input,
-      candidate.interestScore
-    );
+      const reply = await generateChatReply(
+        candidate.name,
+        recruiterMsg,
+        candidate.interestScore
+      );
 
-    setMessages((prev) => [
-      ...prev,
-      { sender: "candidate", text: reply },
-    ]);
-  };
+      setMessages([
+        { sender: "recruiter", text: recruiterMsg },
+        { sender: "candidate", text: reply },
+      ]);
+    }
+
+    simulateConversation();
+  }, [candidate]);
 
   return (
     <div
@@ -61,24 +57,7 @@ export default function CandidateChat({ candidate, onClose }) {
         ))}
       </div>
 
-      <input
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder="Type message..."
-        style={{
-          width: "70%",
-          padding: "8px",
-          marginTop: "10px",
-          borderRadius: "6px",
-          border: "none",
-        }}
-      />
-
-      <button onClick={sendMessage} style={{ marginLeft: "10px" }}>
-        Send
-      </button>
-
-      <button onClick={onClose} style={{ marginLeft: "10px" }}>
+      <button onClick={onClose} style={{ marginTop: "10px" }}>
         Close
       </button>
     </div>

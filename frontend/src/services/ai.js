@@ -12,7 +12,7 @@ async function ask(messages, max_tokens = 50) {
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
         messages,
-        temperature: 0.5,
+        temperature: 0.3, // tighter responses
         max_tokens,
       }),
     });
@@ -58,14 +58,15 @@ export async function generateFeedback(name, skills) {
 
 export async function generateChatReply(name, message, interest) {
   try {
-    let tone = "";
+    let instruction = "";
 
     if (interest > 70) {
-      tone = "very interested and positive";
+      instruction = "You are VERY INTERESTED in this job. Show enthusiasm.";
     } else if (interest > 40) {
-      tone = "neutral and slightly interested";
+      instruction = "You are UNSURE about this job. Ask for more details.";
     } else {
-      tone = "not interested and slightly dismissive";
+      instruction =
+        "You are NOT INTERESTED in this job. Politely decline clearly. Do NOT say yes.";
     }
 
     return await ask(
@@ -73,19 +74,30 @@ export async function generateChatReply(name, message, interest) {
         {
           role: "user",
           content: `You are a job candidate named ${name}.
-Your attitude is ${tone}.
 
-Reply to recruiter message: "${message}"
-Keep it short and realistic.`,
+STRICT RULES:
+- Follow the interest instruction strictly
+- Do NOT contradict it
+- Keep reply under 12 words
+- Only one sentence
+
+${instruction}
+
+Recruiter message: "${message}"
+
+Reply now.`,
         },
       ],
-      60
+      40
     );
   } catch {
-    return interest > 70
-      ? "Yes, I’m interested. Can you share more details?"
-      : interest > 40
-      ? "I’m considering it, can you share more info?"
-      : "I’m not interested at the moment.";
+    
+    if (interest > 70) {
+      return "Yes, I’m very interested in this role.";
+    } else if (interest > 40) {
+      return "I’d like more details before deciding.";
+    } else {
+      return "I’m not interested at the moment.";
+    }
   }
 }

@@ -198,13 +198,7 @@ frontend/
 
 ---
 
-## 📩 Submission Details
 
-* GitHub Repo: https://github.com/Ridhima-bhardwaj/TALENT-IMPULSE-AI
-* Live URL: https://talent-impulse-ai.vercel.app/
-* Demo Video: 
-
----
 
 ## 👩‍💻 Author
 
